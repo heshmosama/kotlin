@@ -4619,6 +4619,12 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             doTest(fileName);
         }
 
+        @TestMetadata("parameterWithNameForFunctionType.kt")
+        public void testParameterWithNameForFunctionType() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/parameterWithNameForFunctionType.kt");
+            doTest(fileName);
+        }
+
         @TestMetadata("quicksort.kt")
         public void testQuicksort() throws Exception {
             String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/quicksort.kt");
