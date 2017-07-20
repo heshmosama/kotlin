@@ -1037,14 +1037,25 @@ internal fun <D : KtNamedDeclaration> placeDeclarationInContainer(
         else classBody.addAfter(declaration, classBody.lBrace!!) as KtNamedDeclaration
     }
 
-
     fun addNextToOriginalElementContainer(addBefore: Boolean): D {
         val sibling = anchor.parentsWithSelf.first { it.parent == actualContainer }
         return if (addBefore) {
-            actualContainer.addBefore(declaration, sibling)
+            val typedAnchor = if (actualContainer !is KtBlockExpression) {
+                sibling.siblings(forward = false, withItself = false).firstOrNull { it::class == declaration::class }
+            }
+            else null
+            if (typedAnchor != null) {
+                actualContainer.addAfter(declaration, typedAnchor)
+            }
+            else {
+                actualContainer.addBefore(declaration, sibling)
+            }
         }
         else {
-            actualContainer.addAfter(declaration, sibling)
+            val typedAnchor = if (actualContainer !is KtBlockExpression && (declaration is KtProperty || declaration is KtSecondaryConstructor)) {
+                actualContainer.allChildren.lastOrNull { it::class == declaration::class }
+            } else null
+            actualContainer.addAfter(declaration, typedAnchor ?: sibling)
         } as D
     }
 
@@ -1079,7 +1090,9 @@ internal fun <D : KtNamedDeclaration> placeDeclarationInContainer(
         }
 
         container is KtClassOrObject -> {
-            insertMember(null, container, declaration, container.declarations.lastOrNull())
+            val typedAnchor = container.declarations.lastOrNull { it::class == declaration::class }
+            val prevSibling = typedAnchor ?: if (declaration is KtProperty) null else container.declarations.lastOrNull()
+            insertMember(null, container, declaration, prevSibling)
         }
         else -> throw AssertionError("Invalid containing element: ${container.text}")
     }
