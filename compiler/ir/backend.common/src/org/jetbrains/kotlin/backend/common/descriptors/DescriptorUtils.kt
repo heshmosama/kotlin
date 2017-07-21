@@ -88,6 +88,16 @@ fun ClassDescriptor.getFunction(name: String, types: List<KotlinType>): Function
             .getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BACKEND).single().substitute(typeSubstitutor)!!
 }
 
+fun ClassDescriptor.getStaticFunction(name: String, types: List<KotlinType>): FunctionDescriptor {
+    val typeSubstitutor = TypeSubstitutor.create(
+            declaredTypeParameters
+                    .withIndex()
+                    .associateBy({ it.value.typeConstructor }, { TypeProjectionImpl(types[it.index]) })
+    )
+    return staticScope
+            .getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BACKEND).single().substitute(typeSubstitutor)!!
+}
+
 fun ClassDescriptor.getProperty(name: String, types: List<KotlinType>): PropertyDescriptor {
     val typeSubstitutor = TypeSubstitutor.create(
             declaredTypeParameters
