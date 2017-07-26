@@ -72,9 +72,10 @@ public abstract class CLICompiler<A extends CommonCompilerArguments> extends CLI
             ExitCode exitCode = OK;
 
             int repeatCount = 1;
-            if (arguments.repeat != null) {
+            String repeat = arguments.getRepeat();
+            if (repeat != null) {
                 try {
-                    repeatCount = Integer.parseInt(arguments.repeat);
+                    repeatCount = Integer.parseInt(repeat);
                 }
                 catch (NumberFormatException ignored) {
                 }
@@ -125,13 +126,13 @@ public abstract class CLICompiler<A extends CommonCompilerArguments> extends CLI
     private void setupCommonArgumentsAndServices(
             @NotNull CompilerConfiguration configuration, @NotNull A arguments, @NotNull Services services
     ) {
-        if (arguments.noInline) {
+        if (arguments.getNoInline()) {
             configuration.put(CommonConfigurationKeys.DISABLE_INLINE, true);
         }
-        if (arguments.intellijPluginRoot != null) {
-            configuration.put(CLIConfigurationKeys.INTELLIJ_PLUGIN_ROOT, arguments.intellijPluginRoot);
+        if (arguments.getIntellijPluginRoot()!= null) {
+            configuration.put(CLIConfigurationKeys.INTELLIJ_PLUGIN_ROOT, arguments.getIntellijPluginRoot());
         }
-        if (arguments.reportOutputFiles) {
+        if (arguments.getReportOutputFiles()) {
             configuration.put(CommonConfigurationKeys.REPORT_OUTPUT_FILES, true);
         }
         @SuppressWarnings("deprecation")
@@ -144,8 +145,8 @@ public abstract class CLICompiler<A extends CommonCompilerArguments> extends CLI
     }
 
     private void setupLanguageVersionSettings(@NotNull CompilerConfiguration configuration, @NotNull A arguments) {
-        LanguageVersion languageVersion = parseVersion(configuration, arguments.languageVersion, "language");
-        LanguageVersion apiVersion = parseVersion(configuration, arguments.apiVersion, "API");
+        LanguageVersion languageVersion = parseVersion(configuration, arguments.getLanguageVersion(), "language");
+        LanguageVersion apiVersion = parseVersion(configuration, arguments.getApiVersion(), "API");
 
         if (languageVersion == null) {
             // If only "-api-version" is specified, language version is assumed to be the latest stable
@@ -180,7 +181,7 @@ public abstract class CLICompiler<A extends CommonCompilerArguments> extends CLI
         }
 
         Map<LanguageFeature, LanguageFeature.State> extraLanguageFeatures = new HashMap<>(0);
-        if (arguments.multiPlatform) {
+        if (arguments.getMultiPlatform()) {
             extraLanguageFeatures.put(LanguageFeature.MultiPlatformProjects, LanguageFeature.State.ENABLED);
         }
 
@@ -202,7 +203,7 @@ public abstract class CLICompiler<A extends CommonCompilerArguments> extends CLI
             @NotNull CompilerConfiguration configuration,
             @NotNull CommonCompilerArguments arguments
     ) {
-        switch (arguments.coroutinesState) {
+        switch (arguments.getCoroutinesState()) {
             case CommonCompilerArguments.ERROR:
                 return LanguageFeature.State.ENABLED_WITH_ERROR;
             case CommonCompilerArguments.ENABLE:
@@ -210,7 +211,7 @@ public abstract class CLICompiler<A extends CommonCompilerArguments> extends CLI
             case CommonCompilerArguments.WARN:
                 return null;
             default:
-                String message = "Invalid value of -Xcoroutines (should be: enable, warn or error): " + arguments.coroutinesState;
+                String message = "Invalid value of -Xcoroutines (should be: enable, warn or error): " + arguments.getCoroutinesState();
                 configuration.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY).report(ERROR, message, null);
                 return null;
         }
