@@ -33,8 +33,6 @@ import org.jetbrains.kotlin.load.java.lazy.replaceComponents
 import org.jetbrains.kotlin.load.java.lazy.resolveAnnotations
 import org.jetbrains.kotlin.load.java.lazy.types.toAttributes
 import org.jetbrains.kotlin.load.java.structure.JavaClass
-import org.jetbrains.kotlin.load.java.structure.JavaClassifierType
-import org.jetbrains.kotlin.load.java.structure.JavaType
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.isValidJavaFqName
 import org.jetbrains.kotlin.platform.createMappedTypeParametersSubstitution
@@ -47,6 +45,7 @@ import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.utils.addIfNotNull
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
+import org.jetbrains.kotlin.utils.compact
 import java.util.*
 
 class LazyJavaClassDescriptor(
@@ -170,21 +169,12 @@ class LazyJavaClassDescriptor(
         override fun computeSupertypes(): Collection<KotlinType> {
             val javaTypes = jClass.supertypes
             val result = ArrayList<KotlinType>(javaTypes.size)
-            val incomplete = ArrayList<JavaType>(0)
 
             val purelyImplementedSupertype: KotlinType? = getPurelyImplementedSupertype()
 
             for (javaType in javaTypes) {
                 val kotlinType = c.typeResolver.transformJavaType(javaType, TypeUsage.SUPERTYPE.toAttributes())
-                if (kotlinType.constructor.declarationDescriptor is NotFoundClasses.MockClassDescriptor) {
-                    incomplete.add(javaType)
-                }
-
-                if (kotlinType.constructor == purelyImplementedSupertype?.constructor) {
-                    continue
-                }
-
-                if (!KotlinBuiltIns.isAnyOrNullableAny(kotlinType)) {
+                if (kotlinType.constructor != purelyImplementedSupertype?.constructor && !KotlinBuiltIns.isAnyOrNullableAny(kotlinType)) {
                     result.add(kotlinType)
                 }
             }
@@ -199,13 +189,7 @@ class LazyJavaClassDescriptor(
 
             result.addIfNotNull(purelyImplementedSupertype)
 
-            if (incomplete.isNotEmpty()) {
-                c.components.errorReporter.reportIncompleteHierarchy(declarationDescriptor, incomplete.map { javaType ->
-                    (javaType as JavaClassifierType).presentableText
-                })
-            }
-
-            return if (result.isNotEmpty()) result.toList() else listOf(c.module.builtIns.anyType)
+            return if (result.isNotEmpty()) result.compact() else listOf(c.module.builtIns.anyType)
         }
 
         private fun getPurelyImplementedSupertype(): KotlinType? {

@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.DescriptorFactory
 import org.jetbrains.kotlin.resolve.NonReportingOverrideStrategy
 import org.jetbrains.kotlin.resolve.OverridingUtil
-import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.descriptorUtil.computeSealedSubclasses
 import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
@@ -174,24 +173,10 @@ class DeserializedClassDescriptor(
             this@DeserializedClassDescriptor.computeConstructorTypeParameters()
         }
 
-        override fun computeSupertypes(): Collection<KotlinType> {
-            val result = classProto.supertypes(c.typeTable).map { supertypeProto ->
-                c.typeDeserializer.type(supertypeProto)
-            } + c.components.additionalClassPartsProvider.getSupertypes(this@DeserializedClassDescriptor)
-
-            val unresolved = result.mapNotNull { supertype ->
-                supertype.constructor.declarationDescriptor as? NotFoundClasses.MockClassDescriptor
-            }
-
-            if (unresolved.isNotEmpty()) {
-                c.components.errorReporter.reportIncompleteHierarchy(
-                        this@DeserializedClassDescriptor,
-                        unresolved.map { it.classId?.asSingleFqName()?.asString() ?: it.name.asString() }
-                )
-            }
-
-            return result.toList()
-        }
+        override fun computeSupertypes(): Collection<KotlinType> =
+                classProto.supertypes(c.typeTable).map { supertypeProto ->
+                    c.typeDeserializer.type(supertypeProto)
+                } + c.components.additionalClassPartsProvider.getSupertypes(this@DeserializedClassDescriptor)
 
         override fun getParameters() = parameters()
 

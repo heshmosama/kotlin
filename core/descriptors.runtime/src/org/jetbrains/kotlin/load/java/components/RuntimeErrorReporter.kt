@@ -17,15 +17,9 @@
 package org.jetbrains.kotlin.load.java.components
 
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
-import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.serialization.deserialization.ErrorReporter
 
 object RuntimeErrorReporter : ErrorReporter {
-    // TODO: specialized exceptions
-    override fun reportIncompleteHierarchy(descriptor: ClassDescriptor, unresolvedSuperClasses: MutableList<String>) {
-        throw IllegalStateException("Incomplete hierarchy for class ${descriptor.name}, unresolved classes $unresolvedSuperClasses")
-    }
-
     override fun reportCannotInferVisibility(descriptor: CallableMemberDescriptor) {
         // TODO: use DescriptorRenderer
         throw IllegalStateException("Cannot infer visibility for $descriptor")

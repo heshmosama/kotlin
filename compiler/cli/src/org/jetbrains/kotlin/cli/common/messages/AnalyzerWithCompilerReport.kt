@@ -27,12 +27,10 @@ import org.jetbrains.kotlin.diagnostics.*
 import org.jetbrains.kotlin.diagnostics.DiagnosticUtils.sortedDiagnostics
 import org.jetbrains.kotlin.diagnostics.rendering.DefaultErrorMessages
 import org.jetbrains.kotlin.load.java.JvmBytecodeBinaryVersion
-import org.jetbrains.kotlin.load.java.components.TraceBasedErrorReporter
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.AnalyzingUtils
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
-import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.diagnostics.Diagnostics
 import org.jetbrains.kotlin.resolve.jvm.JvmBindingContextSlices
 import org.jetbrains.kotlin.resolve.jvm.JvmClassName
@@ -40,22 +38,6 @@ import org.jetbrains.kotlin.serialization.deserialization.IncompatibleVersionErr
 
 class AnalyzerWithCompilerReport(private val messageCollector: MessageCollector) {
     lateinit var analysisResult: AnalysisResult
-
-    private fun reportIncompleteHierarchies() {
-        val bindingContext = analysisResult.bindingContext
-        val classes = bindingContext.getKeys(TraceBasedErrorReporter.INCOMPLETE_HIERARCHY)
-        if (!classes.isEmpty()) {
-            val message = StringBuilder("Supertypes of the following classes cannot be resolved. " +
-                                        "Please make sure you have the required dependencies in the classpath:\n")
-            for (descriptor in classes) {
-                val fqName = DescriptorUtils.getFqName(descriptor).asString()
-                val unresolved = bindingContext.get(TraceBasedErrorReporter.INCOMPLETE_HIERARCHY, descriptor)
-                assert(unresolved != null && !unresolved.isEmpty()) { "Incomplete hierarchy should be reported with names of unresolved superclasses: " + fqName }
-                message.append("    class ").append(fqName).append(", unresolved supertypes: ").append(unresolved!!.joinToString()).append("\n")
-            }
-            messageCollector.report(ERROR, message.toString())
-        }
-    }
 
     private fun reportAlternativeSignatureErrors() {
         val bc = analysisResult.bindingContext
@@ -96,7 +78,6 @@ class AnalyzerWithCompilerReport(private val messageCollector: MessageCollector)
         analysisResult = analyze()
         reportSyntaxErrors(files)
         reportDiagnostics(analysisResult.bindingContext.diagnostics, messageCollector)
-        reportIncompleteHierarchies()
         reportAlternativeSignatureErrors()
     }
 

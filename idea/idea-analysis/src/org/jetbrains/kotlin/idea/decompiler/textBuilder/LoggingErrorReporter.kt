@@ -18,14 +18,9 @@ package org.jetbrains.kotlin.idea.decompiler.textBuilder
 
 import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
-import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.serialization.deserialization.ErrorReporter
 
 class LoggingErrorReporter(private val log: Logger) : ErrorReporter {
-    override fun reportIncompleteHierarchy(descriptor: ClassDescriptor, unresolvedSuperClasses: List<String>) {
-        // This is absolutely fine for the decompiler
-    }
-
     override fun reportCannotInferVisibility(descriptor: CallableMemberDescriptor) {
         log.error("Could not infer visibility for $descriptor")
     }
