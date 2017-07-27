@@ -19,7 +19,7 @@ package org.jetbrains.kotlin.cli.common.arguments
 import org.jetbrains.kotlin.utils.SmartList
 import java.io.Serializable
 
-abstract class CommonToolArguments : Serializable {
+abstract class CommonToolArguments : Serializable, Freezable {
     companion object {
         @JvmStatic private val serialVersionUID = 0L
     }
@@ -44,4 +44,12 @@ abstract class CommonToolArguments : Serializable {
     @GradleOption(DefaultValues.BooleanFalseDefault::class)
     @Argument(value = "-nowarn", description = "Generate no warnings")
     var suppressWarnings: Boolean = false
+
+    override fun freeze(): Freezable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun unfreeze(): Freezable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }
