@@ -76,7 +76,7 @@ class JvmPackageScope(
         addAll(javaScope.getVariableNames())
     }
 
-    override fun getClassifierNames() = kotlinScopes.flatMapTo(mutableSetOf()) { it.getClassifierNames() }.apply {
+    override fun getClassifierNames(): Set<Name>? = kotlinScopes.flatMapTo(mutableSetOf()) { (it.getClassifierNames() ?: return null) as Set<Name> }.apply {
         addAll(javaScope.getClassifierNames())
     }
 

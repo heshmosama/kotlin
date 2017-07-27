@@ -27,10 +27,7 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtImportDirective
 import org.jetbrains.kotlin.psi.KtImportsFactory
 import org.jetbrains.kotlin.resolve.*
-import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
-import org.jetbrains.kotlin.resolve.scopes.ImportingScope
-import org.jetbrains.kotlin.resolve.scopes.LexicalScope
-import org.jetbrains.kotlin.resolve.scopes.SubpackagesImportingScope
+import org.jetbrains.kotlin.resolve.scopes.*
 import org.jetbrains.kotlin.resolve.source.KotlinSourceElement
 import org.jetbrains.kotlin.script.getScriptExternalDependencies
 import org.jetbrains.kotlin.storage.StorageManager
@@ -180,6 +177,7 @@ class FileScopeFactory(
             parentScope: ImportingScope
     ): ImportingScope {
         val scope = packageView.memberScope
+        val names by lazy(LazyThreadSafetyMode.PUBLICATION) { scope.computeAllNames () }
         val packageName = packageView.fqName
         val excludedNames = aliasImportNames.mapNotNull { if (it.parent() == packageName) it.shortName() else null }
 
@@ -216,7 +214,9 @@ class FileScopeFactory(
                 ).filter { it !is PackageViewDescriptor } // subpackages of the current package not accessible by the short name
             }
 
-            override fun definitelyDoesNotContainName(name: Name) = scope.definitelyDoesNotContainName(name)
+            override fun computeImportedNames() = packageView.memberScope.computeAllNames()
+
+            override fun definitelyDoesNotContainName(name: Name) = names?.let { name !in it } ?: false
 
             override fun toString() = "Scope for current package (${filteringKind.name})"
 

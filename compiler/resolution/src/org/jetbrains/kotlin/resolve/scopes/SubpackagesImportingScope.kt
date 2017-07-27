@@ -48,4 +48,8 @@ class SubpackagesImportingScope(
     override fun getContributedDescriptors(kindFilter: DescriptorKindFilter, nameFilter: (Name) -> Boolean): Collection<DeclarationDescriptor> {
         return ImportingScope.Empty.getContributedDescriptors(kindFilter, nameFilter)
     }
+
+    override fun definitelyDoesNotContainName(name: Name) = true
+
+    override fun computeImportedNames() = emptySet<Name>()
 }

@@ -32,7 +32,7 @@ interface MemberScope : ResolutionScope {
      */
     fun getFunctionNames(): Set<Name>
     fun getVariableNames(): Set<Name>
-    fun getClassifierNames(): Set<Name>
+    fun getClassifierNames(): Set<Name>?
 
     /**
      * Is supposed to be used in tests and debug only
@@ -53,6 +53,8 @@ interface MemberScope : ResolutionScope {
         val ALL_NAME_FILTER: (Name) -> Boolean = { true }
     }
 }
+
+fun MemberScope.computeAllNames() = getClassifierNames()?.let { getFunctionNames() + getVariableNames() + it }
 
 /**
  * The same as getDescriptors(kindFilter, nameFilter) but the result is guaranteed to be filtered by kind and name.

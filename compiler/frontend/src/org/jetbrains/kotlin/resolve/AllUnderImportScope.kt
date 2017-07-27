@@ -22,7 +22,8 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.scopes.BaseImportingScope
 import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
-import org.jetbrains.kotlin.resolve.scopes.ResolutionScope
+import org.jetbrains.kotlin.resolve.scopes.MemberScope
+import org.jetbrains.kotlin.resolve.scopes.computeAllNames
 import org.jetbrains.kotlin.utils.Printer
 
 class AllUnderImportScope(
@@ -30,7 +31,7 @@ class AllUnderImportScope(
         excludedImportNames: Collection<FqName>
 ) : BaseImportingScope(null) {
 
-    private val scopes: List<ResolutionScope> = if (descriptor is ClassDescriptor) {
+    private val scopes: List<MemberScope> = if (descriptor is ClassDescriptor) {
         listOf(descriptor.staticScope, descriptor.unsubstitutedInnerClassesScope)
     }
     else {
@@ -50,6 +51,7 @@ class AllUnderImportScope(
     }
 
     override fun definitelyDoesNotContainName(name: Name) = scopes.all { it.definitelyDoesNotContainName(name) }
+    override fun computeImportedNames(): Set<Name>? = scopes.flatMapTo(hashSetOf()) { (it.computeAllNames() ?: return null) as Iterable<Name> }
 
     override fun getContributedDescriptors(kindFilter: DescriptorKindFilter, nameFilter: (Name) -> Boolean): List<DeclarationDescriptor> {
         val nameFilterToUse = if (excludedNames.isEmpty()) { // optimization

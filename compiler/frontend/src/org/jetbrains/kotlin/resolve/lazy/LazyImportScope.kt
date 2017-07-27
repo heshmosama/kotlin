@@ -192,8 +192,11 @@ class LazyImportResolver(
         return importedScopesProvider(directive) ?: ImportingScope.Empty
     }
 
-    fun definitelyDoesNotContainName(name: Name) =
-            indexedImports.importsForName(name).map(this::getImportScope).all { it.definitelyDoesNotContainName(name) }
+    val allNames: Set<Name>? by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        indexedImports.imports.flatMapTo(hashSetOf()) { (getImportScope(it).computeImportedNames() ?: return@lazy null) as Iterable<Name> }
+    }
+
+    fun definitelyDoesNotContainName(name: Name) = allNames?.let { name !in it } ?: false
 }
 
 class LazyImportScope(
@@ -270,4 +273,5 @@ class LazyImportScope(
     }
 
     override fun definitelyDoesNotContainName(name: Name) = importResolver.definitelyDoesNotContainName(name)
+    override fun computeImportedNames() = importResolver.allNames
 }

@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.descriptors.PackageFragmentDescriptor
 import org.jetbrains.kotlin.descriptors.PackageViewDescriptor
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.scopes.ChainedMemberScope
 import org.jetbrains.kotlin.resolve.scopes.LazyScopeAdapter
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
@@ -48,14 +47,6 @@ class LazyPackageViewDescriptorImpl(
             ChainedMemberScope("package view scope for $fqName in ${module.name}", scopes)
         }
     })
-
-    override val allNames: Set<Name> by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        mutableSetOf<Name>().apply {
-            addAll(memberScope.getFunctionNames())
-            addAll(memberScope.getVariableNames())
-            addAll(memberScope.getClassifierNames())
-        }
-    }
 
     override fun getContainingDeclaration(): PackageViewDescriptor? {
         return if (fqName.isRoot) null else module.getPackage(fqName.parent())
