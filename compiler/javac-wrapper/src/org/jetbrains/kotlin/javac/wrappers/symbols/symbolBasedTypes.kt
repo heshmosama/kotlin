@@ -99,9 +99,6 @@ class SymbolBasedClassifierType<out T : TypeMirror>(
     override val classifierQualifiedName: String
         get() = typeMirror.toString()
 
-    override val presentableText: String
-        get() = typeMirror.toString()
-
 }
 
 class SymbolBasedWildcardType(

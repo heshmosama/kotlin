@@ -40,9 +40,6 @@ class ReflectJavaClassifierType(public override val reflectType: Type) : Reflect
     override val classifierQualifiedName: String
         get() = throw UnsupportedOperationException("Type not found: $reflectType")
 
-    override val presentableText: String
-        get() = reflectType.toString()
-
     override val isRaw: Boolean
         get() = with(reflectType) { this is Class<*> && getTypeParameters().isNotEmpty() }
 

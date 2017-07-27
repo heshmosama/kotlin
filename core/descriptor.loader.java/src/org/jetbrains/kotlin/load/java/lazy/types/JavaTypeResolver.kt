@@ -82,7 +82,7 @@ class JavaTypeResolver(
     }
 
     private fun transformJavaClassifierType(javaType: JavaClassifierType, attr: JavaTypeAttributes): KotlinType {
-        fun errorType() = ErrorUtils.createErrorType("Unresolved java class ${javaType.presentableText}")
+        fun errorType() = ErrorUtils.createErrorType("Unresolved Java class ${javaType.classifierQualifiedName}")
 
         val useFlexible = !attr.isForAnnotationParameter && attr.howThisTypeIsUsed != SUPERTYPE
         val isRaw = javaType.isRaw

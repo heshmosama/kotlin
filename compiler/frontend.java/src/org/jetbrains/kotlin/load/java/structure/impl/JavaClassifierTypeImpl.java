@@ -76,12 +76,6 @@ public class JavaClassifierTypeImpl extends JavaTypeImpl<PsiClassType> implement
     }
 
     @Override
-    @NotNull
-    public String getPresentableText() {
-        return getPsi().getPresentableText();
-    }
-
-    @Override
     public boolean isRaw() {
         resolve();
         return resolutionResult.isRaw;

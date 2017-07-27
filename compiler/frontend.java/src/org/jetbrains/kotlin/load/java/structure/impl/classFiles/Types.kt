@@ -47,8 +47,4 @@ internal class PlainJavaClassifierType(
 
     override val classifierQualifiedName: String
         get() = classifierResolverResult.qualifiedName
-
-    // TODO: render arguments for presentable text
-    override val presentableText: String
-        get() = classifierQualifiedName
 }

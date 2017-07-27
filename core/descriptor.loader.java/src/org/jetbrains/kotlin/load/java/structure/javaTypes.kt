@@ -31,7 +31,6 @@ interface JavaClassifierType : JavaType, JavaAnnotationOwner {
     val isRaw: Boolean
 
     val classifierQualifiedName: String
-    val presentableText: String
 }
 
 interface JavaPrimitiveType : JavaType {

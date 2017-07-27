@@ -165,9 +165,6 @@ class MockKotlinClassifierType(override val classifier: JavaClassifier) : JavaCl
     override val classifierQualifiedName: String
         get() = throw UnsupportedOperationException("Should not be called")
 
-    override val presentableText: String
-        get() = throw UnsupportedOperationException("Should not be called")
-
     override fun findAnnotation(fqName: FqName) =
             throw UnsupportedOperationException("Should not be called")
 
