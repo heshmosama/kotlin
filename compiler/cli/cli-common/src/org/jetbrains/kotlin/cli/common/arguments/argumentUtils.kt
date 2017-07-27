@@ -19,6 +19,12 @@ package org.jetbrains.kotlin.cli.common.arguments
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import java.util.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberProperties
 
 fun <T : Any> copyBean(bean: T) = copyFields(bean, bean::class.java.newInstance(), true, collectFieldsToCopy(bean::class.java, false))
 
@@ -87,4 +93,14 @@ fun collectFieldsToCopy(clazz: Class<*>, inheritedOnly: Boolean): List<Field> {
     }
 
     return fromFields
+}
+
+fun <T : Any> collectProperties(kClass: KClass<T>, inheritedOnly: Boolean): List<KProperty1<T, *>> {
+    val properties = ArrayList(kClass.memberProperties)
+    if (inheritedOnly) {
+        properties.removeAll(kClass.declaredMemberProperties)
+    }
+    return properties.filter {
+        it.visibility == KVisibility.PUBLIC && it.findAnnotation<Transient>() == null
+    }
 }

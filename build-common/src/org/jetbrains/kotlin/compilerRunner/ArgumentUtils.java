@@ -22,7 +22,8 @@ import org.jetbrains.kotlin.cli.common.arguments.CommonToolArguments;
 import org.jetbrains.kotlin.cli.common.arguments.ParseCommandLineArgumentsKt;
 import org.jetbrains.kotlin.utils.StringsKt;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ArgumentUtils {
 
     @NotNull
     public static List<String> convertArgumentsToStringList(@NotNull CommonToolArguments arguments)
-            throws InstantiationException, IllegalAccessException {
+            throws InstantiationException, IllegalAccessException, InvocationTargetException {
         List<String> result = new ArrayList<>();
         convertArgumentsToStringList(arguments, arguments.getClass().newInstance(), arguments.getClass(), result);
         result.addAll(arguments.getFreeArgs());
@@ -45,27 +46,27 @@ public class ArgumentUtils {
             @NotNull CommonToolArguments defaultArguments,
             @NotNull Class<?> clazz,
             @NotNull List<String> result
-    ) throws IllegalAccessException, InstantiationException {
-        for (Field field : clazz.getDeclaredFields()) {
-            Argument argument = field.getAnnotation(Argument.class);
+    ) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+        for (Method method : clazz.getDeclaredMethods()) {
+            Argument argument = method.getAnnotation(Argument.class);
             if (argument == null) continue;
 
             Object value;
             Object defaultValue;
             try {
-                value = field.get(arguments);
-                defaultValue = field.get(defaultArguments);
+                value = method.invoke(arguments);
+                defaultValue = method.invoke(defaultArguments);
             }
             catch (IllegalAccessException ignored) {
-                // skip this field
+                // skip this method
                 continue;
             }
 
             if (value == null || Objects.equals(value, defaultValue)) continue;
 
-            Class<?> fieldType = field.getType();
+            Class<?> methodType = method.getReturnType();
 
-            if (fieldType.isArray()) {
+            if (methodType.isArray()) {
                 Object[] values = (Object[]) value;
                 if (values.length == 0) continue;
                 value = StringsKt.join(Arrays.asList(values), ",");
@@ -73,7 +74,7 @@ public class ArgumentUtils {
 
             result.add(argument.value());
 
-            if (fieldType == boolean.class || fieldType == Boolean.class) continue;
+            if (methodType == boolean.class || methodType == Boolean.class) continue;
 
             if (ParseCommandLineArgumentsKt.isAdvanced(argument)) {
                 result.set(result.size() - 1, argument.value() + "=" + value.toString());
