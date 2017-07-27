@@ -61,7 +61,7 @@ abstract class AbstractParcelBoxTest : CodegenTestCase() {
 
     private fun getClassloaderWithoutIdeaClasspath(current: ClassLoader): ClassLoader {
         val parent = current.parent ?: return current
-        if (Class.forName(PsiElement::class.java.name, false, current) != null) {
+        if (current.getResource(PsiElement::class.java.name.replace('.', '/') + ".class") != null) {
             return getClassloaderWithoutIdeaClasspath(parent)
         }
         return current
